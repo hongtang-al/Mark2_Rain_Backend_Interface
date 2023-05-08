@@ -41,6 +41,12 @@ model_features = [x for x in input_cols if x not in ['device', 'time']] + ['pft_
 # Drop rows with missing data
 test_df = output[model_features].dropna()
 
+# download from s3 bucket
+key='m2_rain_offline_model/GBR1p2p2.joblib'
+local_file_path = './GBR1p2p2.joblib'
+s3_client = boto3.client('s3')
+s3_client.download_file(bucket, key, local_file_path)
+
 # Load model
 GBR = joblib.load('GBR1p2p2.joblib')
 
