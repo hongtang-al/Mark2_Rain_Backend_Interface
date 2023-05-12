@@ -1,3 +1,4 @@
+# %%
 import pandas as pd
 import numpy as np
 import os
@@ -5,12 +6,15 @@ import boto3
 import joblib
 import matplotlib.pyplot as plt
 from helper import add_all_engineered_features, aggregate_pft_data, df_from_s3
-
+# %%
 # Read file merged from backend chunk files
 bucket = 'arable-adse-dev'
 key = 'Carbon Project/Stress Index/UCD_Almond/C007978_merged_data.csv'
 df_merged = df_from_s3(key, bucket, format="csv")
+# %%
+df_merged
 
+# %%
 # Normalize the RH file
 RHCUTOFF = 2
 if df_merged['rh'].max() > RHCUTOFF:
@@ -40,6 +44,10 @@ model_features = [x for x in input_cols if x not in ['device', 'time']] + ['pft_
 
 # Drop rows with missing data
 test_df = output[model_features].dropna()
+# %%
+# from sklearn.externals import joblib
+
+# %%
 
 # download from s3 bucket
 key='m2_rain_offline_model/GBR1p2p2.joblib'
@@ -53,6 +61,7 @@ GBR = joblib.load('GBR1p2p2.joblib')
 # Define what-if scenarios
 test_df['dsd_peak_count'] = output['dsd_peak_count']
 
+# %%
 # Make predictions
 y_pred = GBR.predict(test_df[model_features])
 
@@ -66,7 +75,7 @@ new_df.plot(x='time', y=['precip'], figsize=(20, 4))
 plt.show()
 new_df.plot(x='time', y=['weighted_dsd_sum'], figsize=(20, 4))
 plt.show()
-
+# %%
 # Load training data and plot feature importances
 key = 'Carbon Project/Stress Index/UCD_Almond/x_train.csv'
 x_train = df_from_s3(key, bucket, format="csv")
@@ -81,5 +90,5 @@ plt.xticks(rotation=90)
 plt.xlabel('Features')
 plt.ylabel('Importance')
 plt.show()
-
+# %%
 print('Finish')
